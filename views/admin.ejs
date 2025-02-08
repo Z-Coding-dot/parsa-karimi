@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <title>Admin Panel</title>
+  </head>
+  <body class="bg-dark text-light">
+    <%- include('navbar') %>
+    <div class="container mt-5 bg-dark text-light p-4">
+      <h1 class="text-center mb-4">Admin Panel</h1>
+
+      <section class="mb-5">
+        <div class="card">
+          <% if (successMessage) { %>
+          <div class="alert alert-success"><%= successMessage %></div>
+          <% } %> <% if (errorMessage) { %>
+          <div class="alert alert-danger"><%= errorMessage %></div>
+          <% } %>
+          <div class="card-header bg-success text-white">
+            <h2 class="h5 mb-0">Add New User</h2>
+          </div>
+          <div class="card-body">
+            <form id="addUserForm" action="/admin/add" method="POST">
+              <div class="mb-3">
+                <label for="username" class="form-label">Username:</label>
+                <input
+                  type="text"
+                  id="username"
+                  name="username"
+                  class="form-control"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label for="password" class="form-label">Password:</label>
+                <input
+                  type="password"
+                  id="password"
+                  name="password"
+                  class="form-control"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label for="isAdmin" class="form-label">Admin Status:</label>
+                <select id="isAdmin" name="isAdmin" class="form-select">
+                  <option value="false">No</option>
+                  <option value="true">Yes</option>
+                </select>
+              </div>
+              <button type="submit" class="btn btn-primary w-100">
+                Add User
+              </button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- Existing Users Section -->
+      <section class="mb-5">
+        <div class="card">
+          <div class="card-header bg-success text-white">
+            <h2 class="h5 mb-0">Existing Users</h2>
+          </div>
+          <div class="card-body">
+            <table class="table table-bordered table-striped">
+              <thead class="table-dark">
+                <tr>
+                  <th>Username</th>
+                  <th>Admin Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% users.forEach((user) => { %>
+                <tr>
+                  <td><%= user.username %></td>
+                  <td><%= user.isAdmin ? "Yes" : "No" %></td>
+                  <td>
+                    <button
+                      class="btn btn-warning btn-sm me-2"
+                      onclick="editUser('<%= user._id %>', '<%= user.username %>', <%= user.isAdmin %>)"
+                    >
+                      Edit
+                    </button>
+                    <form
+                      action="/admin/delete/<%= user._id %>"
+                      method="POST"
+                      style="display: inline"
+                    >
+                      <button
+                        type="submit"
+                        class="btn btn-danger btn-sm"
+                        onclick="return confirm('Are you sure you want to delete this user?')"
+                      >
+                        Delete
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+            <!-- Managing Items in the Admin Panel -->
+             
+      <section class="mb-5">
+        <div class="card">
+          <div class="card-header bg-primary text-white">
+            <h2 class="h5 mb-0">Manage Items</h2>
+          </div>
+          <div class="card-body">
+            <form id="addItemForm" action="/admin/item/add" method="POST">
+              <div class="mb-3">
+                <label class="form-label">Pictures (comma-separated URLs):</label>
+                <input type="text" name="pictures" class="form-control" required />
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Name (English):</label>
+                <input type="text" name="name_en" class="form-control" required />
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Name (Local Language):</label>
+                <input type="text" name="name_local" class="form-control" required />
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Description (English):</label>
+                <textarea name="description_en" class="form-control" required></textarea>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Description (Local Language):</label>
+                <textarea name="description_local" class="form-control" required></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary w-100">Add Item</button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+ <!-- Edit Existing Items Section -->
+<section class="mb-5">
+  <div class="card">
+    <div class="card-header bg-warning text-dark">
+      <h2 class="h5 mb-0 text-center text-md-start">Edit Existing Items</h2>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-bordered table-striped">
+          <thead class="table-dark">
+            <tr>
+              <th>Image</th>
+              <th>Name (English)</th>
+              <th>Name (Local)</th>
+              <th>Description (English)</th>
+              <th>Description (Local)</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="itemsTableBody">
+            <!-- Items will be inserted here by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Adjust table styles for better responsiveness */
+  .table img {
+    max-width: 100px;
+    height: auto;
+    border-radius: 8px;
+  }
+
+  @media (max-width: 768px) {
+    th, td {
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+  }
+</style>
+
+      
+    </div>
+    <script>
+      // Fetch and Display Existing Items
+      async function fetchItems() {
+          try {
+              const response = await fetch("/items");
+              if (!response.ok) throw new Error("Failed to fetch items");
+  
+              const items = await response.json();
+              const tableBody = document.getElementById("itemsTableBody");
+              tableBody.innerHTML = ""; // Clear previous content
+  
+              items.forEach((item) => {
+                  const picturesHtml = item.pictures.length
+                      ? `<img src="${item.pictures[0]}" width="60" height="60" class="rounded" alt="Item Image"><br>
+                          <input type="text" id="pictures-${item._id}" value="${item.pictures.join(',')}" class="form-control form-control-sm mt-2" placeholder="Comma-separated URLs">`
+                      : `<input type="text" id="pictures-${item._id}" class="form-control form-control-sm" placeholder="Comma-separated URLs">`;
+  
+                  tableBody.innerHTML += `
+                      <tr>
+                          <td>${picturesHtml}</td>
+                          <td contenteditable="true" id="name_en-${item._id}">${item.name_en}</td>
+                          <td contenteditable="true" id="name_local-${item._id}">${item.name_local}</td>
+                          <td contenteditable="true" id="description_en-${item._id}" style="max-width: 300px; overflow: auto;">${item.description_en}</td>
+                          <td contenteditable="true" id="description_local-${item._id}" style="max-width: 300px; overflow: auto;">${item.description_local}</td>
+                          <td>
+                              <button class="btn btn-success btn-sm" onclick="saveItemChanges('${item._id}')">Save</button>
+                              <button class="btn btn-danger btn-sm" onclick="deleteItem('${item._id}')">Delete</button>
+                          </td>
+                      </tr>
+                  `;
+              });
+          } catch (error) {
+              console.error("Error fetching items:", error);
+              alert("Failed to load items.");
+          }
+      }
+  
+      // Save Edited Item (Including Image)
+      async function saveItemChanges(itemId) {
+          const updatedData = {
+              pictures: document.getElementById(`pictures-${itemId}`).value.split(',').map(pic => pic.trim()),
+              name_en: document.getElementById(`name_en-${itemId}`).innerText.trim(),
+              name_local: document.getElementById(`name_local-${itemId}`).innerText.trim(),
+              description_en: document.getElementById(`description_en-${itemId}`).innerText.trim(),
+              description_local: document.getElementById(`description_local-${itemId}`).innerText.trim(),
+          };
+  
+          try {
+              const response = await fetch(`/admin/item/edit/${itemId}`, {
+                  method: "PUT",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify(updatedData),
+              });
+  
+              if (!response.ok) throw new Error("Failed to update item");
+  
+              alert("Item updated successfully!");
+              fetchItems(); // Reload updated list
+          } catch (error) {
+              console.error("Error updating item:", error);
+              alert("Error updating item.");
+          }
+      }
+  
+      // Delete Item
+      async function deleteItem(itemId) {
+          if (!confirm("Are you sure you want to delete this item?")) return;
+  
+          try {
+              const response = await fetch(`/admin/item/delete/${itemId}`, {
+                  method: "DELETE",
+              });
+  
+              if (!response.ok) throw new Error("Failed to delete item");
+  
+              alert("Item deleted successfully!");
+              fetchItems(); // Reload updated list
+          } catch (error) {
+              console.error("Error deleting item:", error);
+              alert("Error deleting item.");
+          }
+      }
+  
+      function editUser(id, username, isAdmin) {
+        const newUsername = prompt("Edit Username:", username)?.trim();
+        if (!newUsername) {
+            alert("Username cannot be empty!");
+            return;
+        }
+
+        const newIsAdmin = confirm("Should this user be an admin?");
+
+        fetch(`/admin/edit/${id}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username: newUsername, isAdmin: newIsAdmin }),
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(errorMessage => {
+                    throw new Error(errorMessage.error || "Unknown error");
+                });
+            }
+            return response.json(); // Expecting JSON
+        })
+        .then(data => {
+            alert(data.message); // Show success message
+            location.reload(); // Refresh page
+        })
+        .catch(error => {
+            console.error("Error updating user:", error);
+            alert(`An error occurred: ${error.message}`);
+        });
+    }
+  
+      // Handle user form submission logging
+      document.addEventListener("DOMContentLoaded", () => {
+          fetchItems(); // Ensure existing items load on page load
+          const addUserForm = document.getElementById("addUserForm");
+          if (addUserForm) {
+              addUserForm.addEventListener("submit", (e) => {
+                  const formData = new FormData(addUserForm);
+                  console.log("Form data being submitted:", Object.fromEntries(formData));
+              });
+          }
+      });
+  </script>
+    <%- include('footer') %>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

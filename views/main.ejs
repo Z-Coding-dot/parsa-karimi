@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <title>Main Page</title>
+    <style>
+      #items-section {
+        background-color: #1e1e2e;
+        padding: 60px 20px;
+        border-top: 1px solid #483376;
+      }
+
+      #items-section h2 {
+        font-size: 2.5rem;
+        margin-bottom: 40px;
+        font-weight: bold;
+      }
+
+      .card {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        transition: transform 0.3s;
+        border-radius: 15px;
+        background-color: #2a2a3d;
+        color: #fff;
+        overflow: hidden;
+      }
+
+      .card:hover {
+        transform: translateY(-5px);
+      }
+
+      .card-img-top {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        border-top-left-radius: 15px;
+        border-top-right-radius: 15px;
+        cursor: pointer;
+      }
+
+      .read-more-btn {
+        text-decoration: none;
+        font-weight: bold;
+        cursor: pointer;
+        color: #bbb;
+      }
+
+      .read-more-btn:hover {
+        text-decoration: underline;
+        color: #fff;
+      }
+    </style>
+  </head>
+
+  <body class="text-light bg-dark">
+    <%- include('navbar') %>
+    <!-- Fullscreen Welcome Section -->
+<div id="welcome-section">
+    <div class="welcome-container">
+      <h1 class="welcome-title">
+        <span id="typed-text"></span>
+        <span class="cursor">|</span>
+      </h1>
+      <p class="welcome-subtitle">Your journey of discovery, learning, and growth starts here.</p>
+    </div>
+  </div>
+  
+  <style>
+    /* Fullscreen Welcome Section Styles */
+    #welcome-section {
+      position: relative;
+      height: 100vh;
+      background:url(/images/32.jpg) no-repeat center center/cover;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      overflow: hidden;
+    }
+  
+    .welcome-container {
+      text-align: center;
+      z-index: 2;
+    }
+  
+    .welcome-title {
+      font-size:clamp(2rem, 10vw, 5rem);
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+  
+    .cursor {
+      display: inline-block;
+      font-size: 3rem;
+      font-weight: bold;
+      animation: blink 1s infinite;
+    }
+  
+    .welcome-subtitle {
+      font-size: 1.5rem;
+      font-weight: 300;
+      margin-top: 20px;
+      animation: fadeIn 2s ease-in-out 1.5s forwards;
+      opacity: 0;
+    }
+  
+    @keyframes blink {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0;
+      }
+    }
+  
+    @keyframes fadeIn {
+      0% {
+        opacity: 0;
+      }
+      100% {
+        opacity: 1;
+      }
+    }
+  
+    /* Background Animation */
+    #welcome-section::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.15), transparent);
+      animation: pulse 6s infinite linear;
+      transform: translate(-50%, -50%) rotate(45deg);
+      z-index: 1;
+    }
+  
+    @keyframes pulse {
+      0% {
+        transform: translate(-50%, -50%) scale(1);
+      }
+      50% {
+        transform: translate(-50%, -50%) scale(1.1);
+      }
+      100% {
+        transform: translate(-50%, -50%) scale(1);
+      }
+    }
+  </style>
+  
+  <script>
+    // Typing animation for welcome text
+    const texts = ["Welcome", "to Our", "Amazing Website"];
+    const typedTextElement = document.getElementById("typed-text");
+    const typingSpeed = 150; // Typing speed in ms
+    const erasingSpeed = 100; // Erasing speed in ms
+    const delayBetweenTexts = 1500; // Delay between each text
+    let textIndex = 0;
+    let charIndex = 0;
+  
+    function type() {
+      if (charIndex < texts[textIndex].length) {
+        typedTextElement.textContent += texts[textIndex].charAt(charIndex);
+        charIndex++;
+        setTimeout(type, typingSpeed);
+      } else {
+        setTimeout(erase, delayBetweenTexts);
+      }
+    }
+  
+    function erase() {
+      if (charIndex > 0) {
+        typedTextElement.textContent = texts[textIndex].substring(0, charIndex - 1);
+        charIndex--;
+        setTimeout(erase, erasingSpeed);
+      } else {
+        textIndex = (textIndex + 1) % texts.length; // Loop back to the first text
+        setTimeout(type, typingSpeed);
+      }
+    }
+  
+    document.addEventListener("DOMContentLoaded", () => {
+      if (texts.length) {
+        setTimeout(type, delayBetweenTexts);
+      }
+    });
+  </script>
+  
+
+    <!-- Items Section -->
+    <div id="items-section">
+      <div class="container">
+        <h2 class="text-center text-light">Latest Items</h2>
+        <div id="itemsContainer" class="row justify-content-center g-4"></div>
+      </div>
+    </div>
+
+    <!-- Modal for Full Description -->
+    <div
+      class="modal fade"
+      id="descriptionModal"
+      tabindex="-1"
+      aria-labelledby="descriptionModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header bg-dark text-light">
+            <h5 class="modal-title" id="descriptionModalLabel">Full Details</h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body bg-dark text-light">
+            <div
+              id="modalImageCarousel"
+              class="carousel slide"
+              data-bs-ride="carousel"
+            >
+              <div class="carousel-inner" id="modalImageContainer"></div>
+              <button
+                class="carousel-control-prev"
+                type="button"
+                data-bs-target="#modalImageCarousel"
+                data-bs-slide="prev"
+              >
+                <span
+                  class="carousel-control-prev-icon"
+                  aria-hidden="true"
+                ></span>
+              </button>
+              <button
+                class="carousel-control-next"
+                type="button"
+                data-bs-target="#modalImageCarousel"
+                data-bs-slide="next"
+              >
+                <span
+                  class="carousel-control-next-icon"
+                  aria-hidden="true"
+                ></span>
+              </button>
+            </div>
+            <p>
+              <strong>English:</strong> <span id="fullDescriptionEn"></span>
+            </p>
+            <p>
+              <strong>Local:</strong> <span id="fullDescriptionLocal"></span>
+            </p>
+          </div>
+          <div class="modal-footer bg-dark">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <%- include('footer') %>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", fetchItems);
+
+      async function fetchItems() {
+        try {
+          const response = await fetch("/items");
+          if (!response.ok) throw new Error("Failed to fetch items");
+
+          const items = await response.json();
+          const itemsContainer = document.getElementById("itemsContainer");
+          itemsContainer.innerHTML = "";
+
+          items.forEach((item) => {
+            const pictures = item.pictures.length
+              ? item.pictures
+              : ["default.jpg"];
+
+            const card = `
+    <div class="col-md-4">
+      <div class="card">
+        <div id="carousel-${
+          item._id
+        }" class="carousel slide" data-bs-ride="carousel">
+          <div class="carousel-inner">
+            ${pictures
+              .map(
+                (pic, index) =>
+                  `<div class="carousel-item ${index === 0 ? "active" : ""}">
+                    <img src="${pic}" class="d-block w-100 card-img-top" alt="Item Image">
+                  </div>`
+              )
+              .join("")}
+          </div>
+          <button class="carousel-control-prev" type="button" data-bs-target="#carousel-${
+            item._id
+          }" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          </button>
+          <button class="carousel-control-next" type="button" data-bs-target="#carousel-${
+            item._id
+          }" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          </button>
+        </div>
+        <div class="card-body">
+          <h5 class="card-title">${item.name_en} / ${item.name_local}</h5>
+          <p class="card-text">
+            <strong>English:</strong> ${item.description_en.substring(
+              0,
+              100
+            )}...<br>
+            <strong>Local:</strong> ${item.description_local.substring(
+              0,
+              100
+            )}...
+          </p>
+          <button class="btn btn-sm btn-light read-more-btn" onclick="showFullDetails('${
+            item._id
+          }')">
+            Read More
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+
+            itemsContainer.innerHTML += card;
+          });
+        } catch (error) {
+          console.error("Error fetching items:", error);
+        }
+      }
+
+      function nextImage(itemId, pictures) {
+        let imgElement = document.getElementById(`img-${itemId}`);
+        let currentSrc = imgElement.src.split("/").pop(); // Extract filename only
+        let currentIndex = pictures.indexOf(currentSrc);
+
+        // If image is not found in the array, reset to first image
+        let nextIndex = (currentIndex + 1) % pictures.length;
+
+        imgElement.src = pictures[nextIndex];
+      }
+
+      async function showFullDetails(itemId) {
+        try {
+          const response = await fetch(`/items/${itemId}`);
+          if (!response.ok) throw new Error("Failed to fetch item details");
+
+          const item = await response.json();
+
+          // Debugging: Check what is returned
+          console.log("Fetched Item Data:", item);
+
+          if (!item.description_en || !item.description_local) {
+            console.error("Description fields are missing from the response");
+            return;
+          }
+
+          document.getElementById("fullDescriptionEn").innerText =
+            item.description_en;
+          document.getElementById("fullDescriptionLocal").innerText =
+            item.description_local;
+
+          // Fix for Image Carousel in Modal
+          const modalImageContainer = document.getElementById(
+            "modalImageContainer"
+          );
+          modalImageContainer.innerHTML = item.pictures.length
+            ? item.pictures
+                .map(
+                  (pic, index) =>
+                    `<div class="carousel-item ${index === 0 ? "active" : ""}">
+                    <img src="${pic}" class="d-block w-100" alt="Item Image">
+                </div>`
+                )
+                .join("")
+            : `<div class="carousel-item active"><img src="default.jpg" class="d-block w-100" alt="Default Image"></div>`;
+
+          new bootstrap.Modal(
+            document.getElementById("descriptionModal")
+          ).show();
+        } catch (error) {
+          console.error("Error fetching full details:", error);
+        }
+      }
+    </script>
+  </body>
+</html>
